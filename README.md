@@ -64,6 +64,7 @@ Because Claude can call the tool repeatedly, you can ask it to watch your screen
 
 ```
 "Take a screenshot every 5 seconds for the next minute and describe what changes"
+"Wait 30 seconds then take a screenshot"
 "Watch the Unity window and let me know when the build finishes"
 "Capture the game window every 10 seconds while I playtest — give me feedback on the UI"
 ```
