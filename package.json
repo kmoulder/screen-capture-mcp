@@ -1,11 +1,44 @@
 {
   "name": "screen-capture-mcp",
   "version": "1.0.0",
+  "description": "MCP server that gives Claude Code the ability to take screenshots. Capture full screen or specific windows by title. Windows only.",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "screen-capture-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "screenshot",
+    "screen-capture",
+    "claude",
+    "claude-code",
+    "anthropic",
+    "ai-tools",
+    "windows"
+  ],
+  "author": "Kyle Moulder",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kmoulder/screen-capture-mcp.git"
+  },
+  "homepage": "https://github.com/kmoulder/screen-capture-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/kmoulder/screen-capture-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
