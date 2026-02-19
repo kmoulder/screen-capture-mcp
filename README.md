@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/screen-capture-mcp.svg)](https://www.npmjs.com/package/screen-capture-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An MCP server that gives Claude Code (or any MCP client) the ability to take screenshots of your screen. Useful when working on games, GUIs, or anything visual where Claude needs to see what you see.
+An quick and easy MCP server that gives Claude Code (or any MCP client) the ability to take screenshots of your screen or specific programs over any specified interval (e.g. "take a screenshot of Unreal Engine every 5 seconds for the next minute".) Useful when working on games, GUIs, or anything visual where Claude needs to see what you see.
 
 **Windows only** — uses PowerShell and .NET for screen capture.
 
