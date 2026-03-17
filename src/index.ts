@@ -142,16 +142,18 @@ async function resizeImage(
   return pngBuffer;
 }
 
-server.tool(
+server.registerTool(
   "take_screenshot",
-  "Captures a screenshot of the primary display or a specific window. Returns the image as a PNG. If window_title is provided, captures only that window (partial title match). Otherwise captures the full screen.",
   {
-    window_title: z
-      .string()
-      .optional()
-      .describe(
-        "Optional window title to capture (partial match). If omitted, captures the full primary screen."
-      ),
+    description: "Captures a screenshot of the primary display or a specific window. Returns the image as a PNG. If window_title is provided, captures only that window (partial title match). Otherwise captures the full screen.",
+    inputSchema: {
+      window_title: z
+        .string()
+        .optional()
+        .describe(
+          "Optional window title to capture (partial match). If omitted, captures the full primary screen."
+        ),
+    },
   },
   async ({ window_title }) => {
     try {
