@@ -1,6 +1,6 @@
 {
   "name": "screen-capture-mcp",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "mcpName": "io.github.kmoulder/screen-capture-mcp",
   "description": "MCP server that gives Claude Code the ability to take screenshots. Capture full screen or specific windows by title. Windows only.",
   "type": "module",

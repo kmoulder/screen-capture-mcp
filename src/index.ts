@@ -3,22 +3,68 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import sharp from "sharp";
-import { execSync } from "child_process";
+import { spawn } from "child_process";
 
 const server = new McpServer({
   name: "screen-capture-mcp",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
-function runPowerShell(script: string): Buffer {
-  const result = execSync(
-    `powershell -NoProfile -NonInteractive -Command ${JSON.stringify(script)}`,
-    { encoding: "utf-8", maxBuffer: 50 * 1024 * 1024, timeout: 15000 }
-  );
-  return Buffer.from(result.trim(), "base64");
+async function runPowerShell(script: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    // Launch PowerShell, using '-' to indicate that commands should be read from standard input (stdin).
+    const child = spawn("powershell", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "-"
+    ]);
+
+    let stdoutData = "";
+    let stderrData = "";
+
+    child.stdout.on("data", (data) => {
+      stdoutData += data.toString();
+    });
+
+    child.stderr.on("data", (data) => {
+      stderrData += data.toString();
+    });
+
+    // Set timeout protection (15 seconds)
+    const timeoutId = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error("PowerShell script execution timed out (15000ms)"));
+    }, 15000);
+
+    child.on("error", (error) => {
+      clearTimeout(timeoutId);
+      reject(error);
+    });
+
+    child.on("close", (code) => {
+      clearTimeout(timeoutId);
+      if (code !== 0) {
+        reject(
+          new Error(
+            `PowerShell error (code ${code}): ${
+              stderrData.trim() || stdoutData.trim()
+            }`
+          )
+        );
+      } else {
+        // Restore a base64 string to a buffer
+        resolve(Buffer.from(stdoutData.trim(), "base64"));
+      }
+    });
+
+    // Write script to stdin and end input
+    child.stdin.write(script);
+    child.stdin.end();
+  });
 }
 
-function captureFullScreen(): Buffer {
+async function captureFullScreen(): Promise<Buffer> {
   return runPowerShell(`
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Windows.Forms
@@ -38,7 +84,7 @@ $ms.Dispose()
 `);
 }
 
-function captureWindowByTitle(title: string): Buffer {
+async function captureWindowByTitle(title: string): Promise<Buffer> {
   const safeTitle = title.replace(/'/g, "''");
 
   return runPowerShell(`
@@ -112,9 +158,9 @@ server.tool(
       let pngBuffer: Buffer;
 
       if (window_title) {
-        pngBuffer = captureWindowByTitle(window_title);
+        pngBuffer = await captureWindowByTitle(window_title);
       } else {
-        pngBuffer = captureFullScreen();
+        pngBuffer = await captureFullScreen();
       }
 
       pngBuffer = await resizeImage(pngBuffer);
