@@ -33,7 +33,7 @@ async function runPowerShell(script: string): Promise<Buffer> {
 
     // Set timeout protection (15 seconds)
     const timeoutId = setTimeout(() => {
-      child.kill("SIGKILL");
+      child.kill();
       reject(new Error("PowerShell script execution timed out (15000ms)"));
     }, 15000);
 
