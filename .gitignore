@@ -4,3 +4,4 @@ dist/
 mcp-publisher.exe
 mcp-publisher.tar.gz
 server.json
+.idea/
