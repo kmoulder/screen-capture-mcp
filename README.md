@@ -126,6 +126,20 @@ No screenshots are written to your filesystem — they exist only in memory for 
 
 If you want to verify this, the entire server is a single file — [src/index.ts](src/index.ts).
 
+### Security note
+
+Versions up to 1.0.1 built the PowerShell invocation as a single command
+string passed to `execSync`, which runs through `cmd.exe` on Windows by
+default. `cmd.exe` expands `%VAR%` sequences even inside double quotes,
+regardless of the PowerShell-level quoting applied to `window_title` — so
+a title of `%USERNAME%` was silently expanded to the real username before
+PowerShell ever ran it. Since `window_title` is an MCP tool argument an
+agent can be steered into passing untrusted text through, this was a real
+path from attacker-controlled input to shell-level expansion. Fixed by
+switching to `execFileSync` with an argument array, so the script reaches
+`powershell.exe` as one literal argument with no shell in between to
+reinterpret it.
+
 ## How It Works
 
 - Uses PowerShell with `System.Drawing` and `System.Windows.Forms` to capture the screen

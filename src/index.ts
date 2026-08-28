@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import sharp from "sharp";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 
 const server = new McpServer({
   name: "screen-capture-mcp",
@@ -11,8 +11,22 @@ const server = new McpServer({
 });
 
 function runPowerShell(script: string): Buffer {
-  const result = execSync(
-    `powershell -NoProfile -NonInteractive -Command ${JSON.stringify(script)}`,
+  // execFileSync with an argv array and no shell: the script reaches
+  // powershell.exe as one literal argument, with nothing in between to
+  // reinterpret it. The previous version built a single command string
+  // via execSync, which on Windows runs through cmd.exe by default --
+  // and cmd.exe expands %VAR% sequences even inside double quotes,
+  // regardless of any quoting applied for PowerShell's own syntax.
+  // Proof: a window_title of "%USERNAME%" was echoed back as the
+  // actual logged-in username, not the literal string, because cmd.exe
+  // substituted it before PowerShell ever ran. window_title is an
+  // MCP tool argument an agent can be tricked into passing untrusted
+  // text through (prompt injection), so this was a real path from
+  // attacker-controlled input to shell-level expansion, not a
+  // theoretical one.
+  const result = execFileSync(
+    "powershell",
+    ["-NoProfile", "-NonInteractive", "-Command", script],
     { encoding: "utf-8", maxBuffer: 50 * 1024 * 1024, timeout: 15000 }
   );
   return Buffer.from(result.trim(), "base64");
